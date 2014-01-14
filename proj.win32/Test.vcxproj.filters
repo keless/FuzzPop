@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="win32">
+      <UniqueIdentifier>{84a8ebd7-7cf0-47f6-b75e-d441df67da40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes">
+      <UniqueIdentifier>{bb6c862e-70e9-49d9-81b7-3829a6f50471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\CastEngine">
+      <UniqueIdentifier>{a162eed7-6e2e-4c3d-abec-c8f9aa7e2dd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\ZZ">
+      <UniqueIdentifier>{8ee89b89-e562-4e7c-888a-80e32720fb91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\ext">
+      <UniqueIdentifier>{61fbd786-0487-437f-8b37-f90d3b64ce67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\ext\json">
+      <UniqueIdentifier>{c910cff4-944e-41d1-8d33-637270079c1a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\AppDelegate.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\HelloWorldScene.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ZZ\ZZEventBus.cpp">
+      <Filter>Classes\ZZ</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ZZ\ZZProgressBar.cpp">
+      <Filter>Classes\ZZ</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastCommandModel.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastCommandState.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastEffect.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastEntity.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameEntity.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameEntityView.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ext\json\json_reader.cpp">
+      <Filter>Classes\ext\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ext\json\json_value.cpp">
+      <Filter>Classes\ext\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ext\json\json_writer.cpp">
+      <Filter>Classes\ext\json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameAbilityView.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastCommandTime.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\CastEngine\CastCommandScheduler.cpp">
+      <Filter>Classes\CastEngine</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\AppDelegate.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\HelloWorldScene.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ZZ\ZZEventBus.h">
+      <Filter>Classes\ZZ</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ZZ\ZZProgressBar.h">
+      <Filter>Classes\ZZ</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastCommandModel.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastCommandState.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastEffect.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastEntity.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameEntityView.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameEntity.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\autolink.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\config.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\features.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\forwards.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\json.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\json_batchallocator.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\reader.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\value.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ext\json\writer.h">
+      <Filter>Classes\ext\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameAbilityView.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastCommandTime.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\CastEngine\CastCommandScheduler.h">
+      <Filter>Classes\CastEngine</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Classes\ext\json\json_internalarray.inl">
+      <Filter>Classes\ext\json</Filter>
+    </None>
+    <None Include="..\Classes\ext\json\json_internalmap.inl">
+      <Filter>Classes\ext\json</Filter>
+    </None>
+    <None Include="..\Classes\ext\json\json_valueiterator.inl">
+      <Filter>Classes\ext\json</Filter>
+    </None>
+  </ItemGroup>
+</Project>
