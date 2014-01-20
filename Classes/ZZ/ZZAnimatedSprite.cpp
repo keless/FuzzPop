@@ -63,7 +63,7 @@ bool AnimationLogic::init(  const JsonValueRef json )
 
 std::string AnimationLogic::getTransition( const std::string eventName, const std::string fromState )
 {
-	CCLOG("get transition from %s for event %s", fromState.c_str(), eventName.c_str() );
+	//CCLOG("get transition from %s for event %s", fromState.c_str(), eventName.c_str() );
 
 	if( fromState == "" ) return m_defaultState;
 	if( m_states.count(fromState) < 1 ) return "";
@@ -167,7 +167,7 @@ bool AnimatedSprite::init(  AnimationLogic* animLogic, JsonValueRef animSprite )
 			//create a spriteFrame
 			CCRect fRect = CCRectMake( uniformFrameSize*col, uniformFrameSize*row, uniformFrameSize, uniformFrameSize);
 
-			CCLOG("%s add frame %d,%d -- %.2f,%.2fx%.2f:%.2f", animName.c_str(), col, row, fRect.origin.x, fRect.origin.y, fRect.size.width, fRect.size.height);
+			//CCLOG("%s add frame %d,%d -- %.2f,%.2fx%.2f:%.2f", animName.c_str(), col, row, fRect.origin.x, fRect.origin.y, fRect.size.width, fRect.size.height);
 			CCSpriteFrame* sFrame = CCSpriteFrame::createWithTexture(texture, fRect, false, ccp(0,0), fRect.size);
 			
 			sFrameList->addObject(sFrame);
@@ -191,43 +191,65 @@ bool AnimatedSprite::init(  AnimationLogic* animLogic, JsonValueRef animSprite )
 	return true;
 }
 
-void AnimatedSprite::handleAnimEvent( std::string evt )
+bool AnimatedSprite::handleAnimEvent( std::string evt )
 {
 	std::string nextState = m_animLogic->getTransition( evt, m_currAnimName );
-	setAnimState(nextState);
+	return setAnimState(nextState);
 
 }
 
-void AnimatedSprite::setAnimState( std::string stateName )
+bool AnimatedSprite::setAnimState( std::string stateName )
 {
 	if( !m_animations.count(stateName) ) {
 		CCLOG("error: missing anim state %s", stateName.c_str() );
-		return;
+		return false;
 	}
 
+	std::string oldState = m_currAnimName;
+	bool reuseAnim = false;
 	if( stateName == m_currAnimName ) 
 	{
-		CCLOG("anim loop %s", stateName.c_str()); //todo: see if we can reuse the ccsequence object
+		reuseAnim = true;
+		//CCLOG("anim loop %s -- todo: reuse ccanimation?", stateName.c_str()); //todo: see if we can reuse the ccsequence object
 	}
 
-	//stop previous anim
-	if(m_animActionSequence != NULL ) {
-		//m_animAction->stop();
-		this->stopAction( m_animActionSequence );
-		CC_SAFE_RELEASE_NULL( m_animActionSequence );
-	}
+	if(!reuseAnim) {
+		//stop previous anim
+		if(m_animActionSequence != NULL ) {
+			//m_animAction->stop();
+			this->stopAction( m_animActionSequence );
+			CC_SAFE_RELEASE_NULL( m_animActionSequence );
+		}
 
-	m_currAnim = m_animations[stateName];
-	m_currAnimName = stateName;
+		m_currAnim = m_animations[stateName];
+		m_currAnimName = stateName;
 
-	//run current anim
-	m_animAction = CCAnimate::create( m_currAnim );
+		//run current anim
+		m_animAction = CCAnimate::create( m_currAnim );
 	
-	m_animActionSequence = CCSequence::createWithTwoActions( m_animAction, CCCallFunc::create(this, callfunc_selector(AnimatedSprite::onAnimStateEnd)) );
-	CC_SAFE_RETAIN(m_animActionSequence);
+		m_animActionSequence = CCSequence::createWithTwoActions( m_animAction, CCCallFunc::create(this, callfunc_selector(AnimatedSprite::onAnimStateEnd)) );
+		CC_SAFE_RETAIN(m_animActionSequence);
 
-	CCLOG("start animation %s for %fs", stateName.c_str(), m_animAction->getDuration() );
-	this->runAction(m_animActionSequence);
+		//CCLOG("start animation %s for %fs", stateName.c_str(), m_animAction->getDuration() );
+		this->runAction(m_animActionSequence);
+	}else {
+		//CCLOG("reuse anim action");
+		m_animActionSequence->startWithTarget(this);
+	}
+
+
+
+	if( m_listeners.size() > 0 && oldState != m_currAnimName ) {
+		//dispatch anim change event
+		//CCLOG("AS: stateChange %s -> %s", oldState.c_str(), m_currAnimName.c_str() );
+		JsonEvent evt("stateChange");
+		evt.json["oldState"] = oldState;
+		evt.json["newState"] = m_currAnimName;
+
+		dispatch(&evt);
+	}
+
+	return true;
 }
 
 void AnimatedSprite::onAnimStateEnd()

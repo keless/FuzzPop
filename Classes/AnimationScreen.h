@@ -9,7 +9,9 @@ class AnimationScreen : public CCLayer
 protected:
 
 	AnimatedSprite* m_pony;
+	CCLabelTTF* m_lblName;
 
+	void onAnimStateChange( CCObject* e );
 
 public:
 	AnimationScreen(void);

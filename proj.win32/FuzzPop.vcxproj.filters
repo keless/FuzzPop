@@ -94,6 +94,9 @@
     <ClCompile Include="..\Classes\ZZ\ZZAnimatedSprite.cpp">
       <Filter>ZZ</Filter>
     </ClCompile>
+    <ClCompile Include="..\Classes\EntityAnimController.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -210,6 +213,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\ZZ\ZZAnimatedSprite.h">
       <Filter>ZZ</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\EntityAnimController.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

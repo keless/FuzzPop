@@ -26,7 +26,7 @@ bool AnimationScreen::init()
 
 	Json::Value data = ReadFileToJson("ponySprite.json");
 
-	AnimationLogic* animLogic = AnimationLogic::create( data["animSet"] );
+	AnimationLogic* animLogic = AnimationLogic::create( data["animLogic"] );
 
 
 	float menuY = origin.y + visibleSize.height/2;
@@ -55,10 +55,28 @@ bool AnimationScreen::init()
 	m_pony->setPosition(ccp( visibleSize.height/2, visibleSize.height/2 ) );
 	addChild(m_pony);
 
+	m_lblName = CCLabelTTF::create();
+	m_lblName->initWithString( "state", "Arial", 24.0f  );
+	m_lblName->setAnchorPoint(ccp(0.0f, 1.0f ) );
+	m_lblName->setPosition(ccp( visibleSize.height/2, visibleSize.height/2 - 25 ));
+	addChild(m_lblName, 50);
+
+	m_pony->addListener("stateChange", this, callfuncO_selector(AnimationScreen::onAnimStateChange));
+	m_pony->setAnimState("idle");
+
+
 	setTouchEnabled(true);
 	//registerWithTouchDispatcher();
     
     return true;
+}
+
+void AnimationScreen::onAnimStateChange( CCObject* e )
+{
+	JsonEvent* evt = dynamic_cast<JsonEvent*>(e);
+	if(!evt) return;
+
+	m_lblName->setString(evt->json["newState"].asString().c_str());
 }
 
 void AnimationScreen::eventMenuCallback(CCObject* pSender)

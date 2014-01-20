@@ -2,9 +2,10 @@
 #define _ZZANIMATIONSET_H_
 
 /*
- ZZAnimationSet represents a data Resource (as opposed to Instance) 
+ AnimationLogic represents a data Resource (as opposed to Instance) 
 	that represents the relationship of a series of animations as a state transition table
 
+ AnimatedSprite represents an Instance and relies upon an AnimationLogi cobject
 
 */
 
@@ -12,6 +13,7 @@
 using namespace cocos2d;
 
 #include "ZZDefines.h"
+#include "ZZEventBus.h"
 
 namespace ZZ {
 
@@ -24,6 +26,7 @@ public:
 	std::map<std::string, std::string> transitionTable;
 };
 
+//@RESOURCE
 class AnimationLogic : public CCObject
 {
 protected:
@@ -48,19 +51,20 @@ public:
 
 };
 
-class AnimatedSprite : public CCSprite
+//@INSTANCE
+class AnimatedSprite : public CCSprite, public EventBus
 {
 protected:
 
 	std::map<std::string, CCAnimation*> m_animations;
 
-	CCAnimate* m_animAction;
-	CCAction* m_animActionSequence;
+	CCAnimate* m_animAction;		//@INSTANCE
+	CCAction* m_animActionSequence; //@INSTANCE
 
-	CCAnimation* m_currAnim;
+	CCAnimation* m_currAnim;		//@INSTANCE
 	std::string m_currAnimName;
 
-	AnimationLogic* m_animLogic;
+	AnimationLogic* m_animLogic; //@RESOURCE
 
 	AnimatedSprite(void);
 	~AnimatedSprite(void);
@@ -73,8 +77,10 @@ public:
 
 	AnimationLogic* getAnimationSet() { return m_animLogic; }
 
-	void handleAnimEvent( std::string evt );
-	void setAnimState( std::string stateName );
+	const std::string getCurrAnimName() { return m_currAnimName; }
+
+	bool handleAnimEvent( std::string evt );
+	bool setAnimState( std::string stateName );
 };
 
 }

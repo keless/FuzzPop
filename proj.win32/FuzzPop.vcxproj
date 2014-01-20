@@ -133,6 +133,7 @@
     <ClCompile Include="..\Classes\CastEngine\CastPhysics.cpp" />
     <ClCompile Include="..\Classes\CastEngine\CastTarget.cpp" />
     <ClCompile Include="..\Classes\CastEngine\CastWorldModel.cpp" />
+    <ClCompile Include="..\Classes\EntityAnimController.cpp" />
     <ClCompile Include="..\Classes\ext\json\json_reader.cpp" />
     <ClCompile Include="..\Classes\ext\json\json_value.cpp" />
     <ClCompile Include="..\Classes\ext\json\json_writer.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="..\Classes\CastEngine\CastPhysics.h" />
     <ClInclude Include="..\Classes\CastEngine\CastTarget.h" />
     <ClInclude Include="..\Classes\CastEngine\CastWorldModel.h" />
+    <ClInclude Include="..\Classes\EntityAnimController.h" />
     <ClInclude Include="..\Classes\ext\json\autolink.h" />
     <ClInclude Include="..\Classes\ext\json\config.h" />
     <ClInclude Include="..\Classes\ext\json\features.h" />
