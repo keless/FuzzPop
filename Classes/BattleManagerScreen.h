@@ -37,7 +37,7 @@ protected:
 	void initPartyFromJson();
 	void initAbilities();
 	void spawnEnemy();
-	void enemyMovementAI( int enemyIdx, float dt );
+	
 
 	float m_travelProgess;
 	float m_travelDistance;
@@ -47,6 +47,9 @@ protected:
 	void removeEntity( GameEntity* entity, bool isEnemy );
 
 	float getPartySpeed();
+
+	EntityPair* getClosestPlayerToEnemy( EntityPair* enemy );
+	void enemyMovementAI( float dt, EntityPair* enemy, EntityPair* targetPlayer );
 
 public:
 	BattleManagerScreen(void);
@@ -59,8 +62,8 @@ public:
 	virtual void update( float dt );
 
 	//old auto-ai routines
-	void PerformEnemyAI( GameEntity* enemy );
-	void PerformPlayerAi( GameEntity* player );
+	void PerformEnemyAI( float dt, EntityPair* enemy );
+	void PerformPlayerAi( float dt, EntityPair* player );
 
 	//new generic controller routine
 	void handleEntityCommand( std::string cmd );

@@ -50,10 +50,10 @@ bool BattleManagerScreen::init()
 	Json::Value data = ReadFileToJson("ponySprite.json");
 	m_ponyAnimLogic = AnimationLogic::create(data["animLogic"]);
 	m_ponyControllerModel = new EntityAnimController(m_ponyAnimLogic);
-	m_ponyControllerModel->setImpulseMapping("walkN", "walk");
-	m_ponyControllerModel->setImpulseMapping("walkE", "walk");
-	m_ponyControllerModel->setImpulseMapping("walkS", "walk");
-	m_ponyControllerModel->setImpulseMapping("walkW", "walk");
+	m_ponyControllerModel->setImpulseMapping("walk", "walk");
+	m_ponyControllerModel->setImpulseMapping("meleeAttack", "attack1");
+	m_ponyControllerModel->setImpulseMapping("castAttack", "attack2");
+	m_ponyControllerModel->setImpulseMapping("rangedAttack", "attack3");
 	m_ponyControllerModel->setImpulseMapping("startJump", "jump");
 	m_ponyControllerModel->setImpulseMapping("doubleJump", "jump");
 	m_ponyControllerModel->setImpulseMapping("startDeath", "die");
@@ -167,9 +167,9 @@ void BattleManagerScreen::update( float dt )
 			removeEntity( enemy.model, true );
 		}
 		else {
-			enemyMovementAI(i, dt);
+			//enemyMovementAI(i, dt);  //put movement logic into PerformEnemyAI to synch with animations
 
-			PerformEnemyAI(enemy.model);
+			PerformEnemyAI(dt, &enemy);
 		}
 	}
 
@@ -220,7 +220,7 @@ void BattleManagerScreen::update( float dt )
 
 			removeEntity( player.model, false );
 		}else {
-			PerformPlayerAi(m_players[i].model);
+			PerformPlayerAi(dt, &(m_players[i]) );
 		}
 
 		
@@ -232,59 +232,219 @@ void BattleManagerScreen::update( float dt )
 
 //#define DISABLE_ATTACKS
 
-void BattleManagerScreen::PerformEnemyAI( GameEntity* enemy )
+void BattleManagerScreen::PerformEnemyAI( float dt, EntityPair* enemy )
 {
+	if( !CastWorldModel::get()->isValid( enemy->model ) ) return; //skip dead/dying entities
+
+	//skip if busy (should be 'idle' or 'walk' if available)
+	std::string currState = enemy->view->getCurrAnimName();
+	if( currState != "walk" && currState != "idle") return; //entity is busy
+
 	//select ability
 	std::vector<CastCommandState*> abilities;
-	abilities = enemy->getAbilityList();
+	abilities = enemy->model->getAbilityList();
 
 	CastCommandState* cast = abilities[ rand() % abilities.size() ];
 
-	EntityPair& player = m_players[0];
+	//TODO: if beneficial, select friendly target
+	EntityPair* player = getClosestPlayerToEnemy(enemy);
+
+	if( player == NULL ) {
+		//no target, do nothing
+		return;
+	}
 
 		//select target
-	//TODO: if beneficial, select friendly
-	//TODO: handle selection from multiple 'players'
-	enemy->getTarget()->clearTargetEntities();
-	enemy->getTarget()->addTargetEntity(player.model);
+	enemy->model->getTarget()->clearTargetEntities();
+	enemy->model->getTarget()->addTargetEntity(player->model);
 
-	if( enemy->canCast() ) {
+	//todo: check attack animation type requirement
+	// meleeAttack, castAttack, rangedAttack -- based on weapon type?
+	if( enemy->model->canCast()
+		&& enemy->model->handleEntityCommand("meleeAttack", enemy->view)
+		) {
 
 #ifndef DISABLE_ATTACKS
 		cast->startCast();
 #endif
 
+	}else {
+		//see if we should walk towards player
+		enemyMovementAI(dt, enemy, player);
 	}
 }
 
-void BattleManagerScreen::PerformPlayerAi( GameEntity* player )
+EntityPair* BattleManagerScreen::getClosestPlayerToEnemy( EntityPair* enemy )
+{
+	//handle selection from multiple players (heuristic: shortest distance)
+	float shortestDistanceSQ = 999999;
+	int idx = -1;
+	for(int i=0; i< m_players.size(); i++)
+	{
+		kmVec2 dV;
+		GetVecBetween(enemy->model, m_players[0].model, dV);
+
+		float dx = kmVec2LengthSq(&dV);
+		if( dx < shortestDistanceSQ )
+		{
+			shortestDistanceSQ = dx;
+			idx = i;
+		}
+	}
+
+	if( idx < 0 ) return NULL; //no targets within max dist
+
+	return &(m_players[idx]);
+}
+
+void BattleManagerScreen::enemyMovementAI( float dt, EntityPair* enemy, EntityPair* targetPlayer )
+{
+	float speed = 75.0f; //5 pixels/sec
+	
+	std::vector<kmVec2> impulses; //x, y
+	std::vector<float> impulseWeights;
+
+	//target was already selected from closest player
+	EntityPair* player = targetPlayer;
+	
+	CCSize eSize = enemy->view->getContentSize();
+	CCPoint ePos = enemy->view->getPosition();
+	ePos.x += eSize.width/2;
+	ePos.y += eSize.height/2; //convert to center origin
+	CCSize pSize = player->view->getContentSize();
+	CCPoint pPos = player->view->getPosition();
+	pPos.x += pSize.width/2;
+	pPos.y += pSize.height/2; //convert to center origin
+	
+	float playerLeash = pSize.width * 1.1f;
+	float playerLeashSq = playerLeash*playerLeash;
+
+	//impulse towards the player
+	kmVec2 toPlayer = { pPos.x - ePos.x, pPos.y - ePos.y };
+	kmVec2 u_toPlayer;
+	kmVec2Normalize( &u_toPlayer, &toPlayer);
+	
+	
+	if( kmVec2LengthSq( &toPlayer ) < (playerLeashSq * 0.75f) )
+	{
+		//impulse away from player (too close)
+		kmVec2 u_fromPlayer;
+		kmVec2Scale(&u_fromPlayer, &u_toPlayer, -1*0.75f); //flip the 'to player' vector
+		
+		impulses.push_back(u_fromPlayer);
+		impulseWeights.push_back(100); //vastly overweigh the impulse to the player
+	}else {
+
+		if( kmVec2LengthSq(&toPlayer) > playerLeashSq )
+		{
+			//kmVec2Scale(&u_toPlayer, &u_toPlayer, 0.51f);
+			//impulse towards player
+			impulses.push_back(u_toPlayer);
+			impulseWeights.push_back(100);
+
+		}
+	}
+	
+	//add impulses away from other enemies
+	for( int i=0; i< m_enemies.size(); i++) {
+		if( m_enemies[i].model == enemy->model ) continue; //dont impulse away from self
+		
+		CCSize nSize = m_enemies[i].view->getContentSize();
+		CCPoint nPos = m_enemies[i].view->getPosition();
+		nPos.x += nSize.width/2;
+		nPos.y += nSize.height/2;
+		
+		kmVec2 toNeighbor = { nPos.x - ePos.x, nPos.y - ePos.y };
+
+		float neighborLeash = nSize.width;
+		if( kmVec2LengthSq(&toNeighbor) < neighborLeash * neighborLeash ) {
+			kmVec2 u_toNeighbor;
+			kmVec2Normalize(&u_toNeighbor, &toNeighbor);
+			kmVec2 u_fromNeighbor;
+			kmVec2Scale(&u_fromNeighbor, &u_toNeighbor, -1);
+			impulses.push_back(u_fromNeighbor);
+			impulseWeights.push_back(50);
+		}
+	}
+	
+	if( impulses.size() == 0 ) {
+		//set animation to idle/stopped
+		enemy->model->handleEntityCommand("idle", enemy->view);
+		return;
+	}
+
+	//blend impulses
+	kmVec2 finalImpulse = impulses[0]; //zero always valid because its the impulse to the player
+	float finalImpulseWeight = impulseWeights[0];
+	for( int i=1; i< impulses.size(); i++) {
+
+		float w1 = finalImpulseWeight;
+		float w2 = impulseWeights[i];
+		float wTot =  w1 + w2;
+		
+		kmVec2 blend;
+		blend.x = (finalImpulse.x * w1 / wTot) + (impulses[i].x * w2 / wTot);
+		blend.y = (finalImpulse.y * w1 / wTot) + (impulses[i].y * w2 / wTot);
+		
+		//run-length summation
+		finalImpulseWeight = wTot;
+		finalImpulse = blend;
+	}
+	
+	kmVec2 scaledImpulse;
+	kmVec2Scale(&scaledImpulse, &finalImpulse, speed * dt);
+	
+	//CCLog("impulse %.4f", kmVec2Length(& finalImpulse));
+	if( kmVec2Length(& finalImpulse) <  (0.5f) )
+	{
+		//set animation to idle/stopped
+		enemy->model->handleEntityCommand("idle", enemy->view);
+
+		//CCLog("ignore impulse %.4f", kmVec2Length(& finalImpulse));
+		return; //ignore very small changes to avoid leash jitter
+	}
+
+	//TODO: handle walk/run differences?
+	if( enemy->model->handleEntityCommand("walk", enemy->view) ) 
+	{
+		ePos.x += scaledImpulse.x;
+		ePos.y += scaledImpulse.y;
+		ePos.x -= eSize.width/2;
+		ePos.y -= eSize.height/2; //back to original anchor coords
+		enemy->view->setPosition(ePos);
+	}
+	
+
+}
+
+void BattleManagerScreen::PerformPlayerAi( float dt, EntityPair* player )
 {
 	//select ability
 	std::vector<CastCommandState*> abilities;
-	abilities = player->getAbilityList();
+	abilities = player->model->getAbilityList();
 
 	if( abilities.size() == 0 ) return; //no abilities, nothing to do
 
 	CastCommandState* cast = abilities[ rand() % abilities.size() ];
 
 	ICastEntity* target = NULL;
-	if( player->getTarget()->getEntityList().size() > 0 )
-		target = player->getTarget()->getEntityList()[0];
+	if( player->model->getTarget()->getEntityList().size() > 0 )
+		target = player->model->getTarget()->getEntityList()[0];
 	if( !CastWorldModel::get()->isValid( target ) )
 	{
-		player->getTarget()->clearTargetEntities();
+		player->model->getTarget()->clearTargetEntities();
 
 		if( m_enemies.size() > 0 ) {
 
 			//target closest enemy
 			target = m_enemies[0].model;
 			kmVec2 distVec;
-			GetVecBetween(player, target, distVec);
+			GetVecBetween(player->model, target, distVec);
 			float closestEnemy = kmVec2Length( &distVec );
 
 			for( int i=1; i< m_enemies.size(); i++)
 			{
-				GetVecBetween(player, m_enemies[i].model, distVec);
+				GetVecBetween(player->model, m_enemies[i].model, distVec);
 				float distTo = kmVec2Length( &distVec );
 
 				if( distTo < closestEnemy ) {
@@ -295,12 +455,12 @@ void BattleManagerScreen::PerformPlayerAi( GameEntity* player )
 			}
 
 			
-			player->getTarget()->addTargetEntity(target);
+			player->model->getTarget()->addTargetEntity(target);
 		}
 	}
 
 	kmVec2 toTarget;
-	if( GetVecBetween(player, target, toTarget) && player->canCast() && cast->canAfford() ) {
+	if( GetVecBetween(player->model, target, toTarget) && player->model->canCast() && cast->canAfford() ) {
 		
 		float dTargetSq = kmVec2LengthSq( &toTarget );
 		float range = cast->getRange();
@@ -438,113 +598,6 @@ void BattleManagerScreen::setCardDeath( GameEntityView* view )
 	view->runAction( seq );
 }
 
-void BattleManagerScreen::enemyMovementAI( int enemyIdx, float dt )
-{
-	float speed = 75.0f; //5 pixels/sec
-	EntityPair& enemy = m_enemies[enemyIdx];
-	
-	std::vector<kmVec2> impulses; //x, y
-	std::vector<float> impulseWeights;
-
-	//TODO: select from closest player
-	EntityPair& player =  m_players[0];
-	
-	CCSize eSize = enemy.view->getContentSize();
-	CCPoint ePos = enemy.view->getPosition();
-	ePos.x += eSize.width/2;
-	ePos.y += eSize.height/2; //convert to center origin
-	CCSize pSize = player.view->getContentSize();
-	CCPoint pPos = player.view->getPosition();
-	pPos.x += pSize.width/2;
-	pPos.y += pSize.height/2; //convert to center origin
-	
-	float playerLeash = pSize.width * 1.1f;
-	float playerLeashSq = playerLeash*playerLeash;
-
-	//impulse towards the player
-	kmVec2 toPlayer = { pPos.x - ePos.x, pPos.y - ePos.y };
-	kmVec2 u_toPlayer;
-	kmVec2Normalize( &u_toPlayer, &toPlayer);
-	
-	
-	if( kmVec2LengthSq( &toPlayer ) < (playerLeashSq * 0.75f) )
-	{
-		//impulse away from player (too close)
-		kmVec2 u_fromPlayer;
-		kmVec2Scale(&u_fromPlayer, &u_toPlayer, -1*0.75f); //flip the 'to player' vector
-		
-		impulses.push_back(u_fromPlayer);
-		impulseWeights.push_back(100); //vastly overweigh the impulse to the player
-	}else {
-
-		if( kmVec2LengthSq(&toPlayer) > playerLeashSq )
-		{
-			//kmVec2Scale(&u_toPlayer, &u_toPlayer, 0.51f);
-			//impulse towards player
-			impulses.push_back(u_toPlayer);
-			impulseWeights.push_back(100);
-
-		}
-	}
-	
-	//add impulses away from other enemies
-	for( int i=0; i< m_enemies.size(); i++) {
-		if( i == enemyIdx ) continue;
-		
-		CCSize nSize = m_enemies[i].view->getContentSize();
-		CCPoint nPos = m_enemies[i].view->getPosition();
-		nPos.x += nSize.width/2;
-		nPos.y += nSize.height/2;
-		
-		kmVec2 toNeighbor = { nPos.x - ePos.x, nPos.y - ePos.y };
-
-		float neighborLeash = nSize.width;
-		if( kmVec2LengthSq(&toNeighbor) < neighborLeash * neighborLeash ) {
-			kmVec2 u_toNeighbor;
-			kmVec2Normalize(&u_toNeighbor, &toNeighbor);
-			kmVec2 u_fromNeighbor;
-			kmVec2Scale(&u_fromNeighbor, &u_toNeighbor, -1);
-			impulses.push_back(u_fromNeighbor);
-			impulseWeights.push_back(50);
-		}
-	}
-	
-	if( impulses.size() == 0 ) return;
-
-	//blend impulses
-	kmVec2 finalImpulse = impulses[0]; //zero always valid because its the impulse to the player
-	float finalImpulseWeight = impulseWeights[0];
-	for( int i=1; i< impulses.size(); i++) {
-
-		float w1 = finalImpulseWeight;
-		float w2 = impulseWeights[i];
-		float wTot =  w1 + w2;
-		
-		kmVec2 blend;
-		blend.x = (finalImpulse.x * w1 / wTot) + (impulses[i].x * w2 / wTot);
-		blend.y = (finalImpulse.y * w1 / wTot) + (impulses[i].y * w2 / wTot);
-		
-		//run-length summation
-		finalImpulseWeight = wTot;
-		finalImpulse = blend;
-	}
-	
-	kmVec2 scaledImpulse;
-	kmVec2Scale(&scaledImpulse, &finalImpulse, speed * dt);
-	
-	//CCLog("impulse %.4f", kmVec2Length(& finalImpulse));
-	if( kmVec2Length(& finalImpulse) <  (0.5f) )
-	{
-		//CCLog("ignore impulse %.4f", kmVec2Length(& finalImpulse));
-		return; //ignore very small changes to avoid leash jitter
-	}
-	
-	ePos.x += scaledImpulse.x;
-	ePos.y += scaledImpulse.y;
-	ePos.x -= eSize.width/2;
-	ePos.y -= eSize.height/2; //back to original anchor coords
-	enemy.view->setPosition(ePos);
-}
 
 void BattleManagerScreen::initAbilities()
 {
@@ -727,17 +780,21 @@ bool BattleManagerScreen::GetEntitiesInRadius( kmVec2 p, float r, std::vector<IC
 
 void BattleManagerScreen::spawnEnemy()
 {
-	/* todo
 	CCSize screen = boundingBox().size;
 
+	Json::Value data = ReadFileToJson("ponySprite.json");
+
 	EntityPair enemy;
-	enemy.model =  new GameEntity("Giant Rat");
+	enemy.model =  new GameEntity("Giant Rat", data["animLogic"]);
 	enemy.model->addAbility( m_abilities["Bite"] );
+	enemy.model->setAnimController(m_ponyControllerModel);  //todo: use approprite controllers for various entity types
 	//enemy.enemyModel->incProperty("hp_curr", -90);
 	enemy.model->setProperty("hp_base", 50, NULL);
 	enemy.model->setProperty("xp_curr", 10, NULL);
-	enemy.view =  new GameEntityView( enemy.model );
-	enemy.view->setBackground("rat.png");
+	enemy.view =  new GameEntityView( enemy.model, data["animSprite"] );
+	enemy.view->setFlipX(true);
+	enemy.view->setAnimState("idle");
+	//enemy.view->setBackground("rat.png");
 	
 	int offY = (rand()%100) - 50;
 	enemy.view->setPosition( ccp(screen.width, 220 + offY)	);
@@ -745,6 +802,5 @@ void BattleManagerScreen::spawnEnemy()
 	m_enemies.push_back(enemy);
 
 	m_allEntities.push_back(enemy);
-	*/
 }
 

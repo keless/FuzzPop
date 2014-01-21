@@ -243,10 +243,10 @@ std::vector<CastCommandState*>& GameEntity::getAbilityList()
 	return m_abilities;
 }
 
-bool GameEntity::handleEntityCommand(std::string cmd )
+bool GameEntity::handleEntityCommand(std::string cmd, AnimatedSprite* animSprite )
 {
 	//xxx: todo
-	//if( ! m_animController->attemptCommand(cmd )  ) return false;
+	if( ! m_animController->attemptCommand(cmd, animSprite )  ) return false;
 
 	//else do the thing, since the animation is now running
 

@@ -93,7 +93,7 @@ public:
 	void setItemAtSlot( int slotIdx, GameItem* item);
 	GameItem* getItemAtSlot(int slotIdx );
 
-	bool handleEntityCommand(std::string cmd );
+	bool handleEntityCommand(std::string cmd, AnimatedSprite* animSprite );
 
 	//true if not casting any abilities and has valid target
 	bool canCast();
