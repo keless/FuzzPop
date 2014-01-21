@@ -5,9 +5,20 @@
 
 GameEntity::GameEntity(std::string name, JsonValueRef animLogicJson)
 {
-	m_animLogic = AnimationLogic::create( animLogicJson );
-
 	m_name = name;
+	m_animLogic = AnimationLogic::create( animLogicJson );
+	_autoInit();
+}
+
+GameEntity::GameEntity( std::string name, AnimationLogic* animLogic )
+{
+	m_name = name;
+	m_animLogic = animLogic;
+	_autoInit();
+}
+
+void GameEntity::_autoInit() 
+{
 	hp_base = hp_curr = 100;
 
 	mana_base = mana_curr = 100;
@@ -230,6 +241,16 @@ void GameEntity::remAbility( std::string name )
 std::vector<CastCommandState*>& GameEntity::getAbilityList()
 {
 	return m_abilities;
+}
+
+bool GameEntity::handleEntityCommand(std::string cmd )
+{
+	//xxx: todo
+	//if( ! m_animController->attemptCommand(cmd )  ) return false;
+
+	//else do the thing, since the animation is now running
+
+	return true;
 }
 
 bool GameEntity::canCast()

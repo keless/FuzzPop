@@ -30,6 +30,8 @@ protected:
 	std::vector<EntityPair> m_players;
 	std::vector<EntityPair> m_enemies;
 
+	AnimationLogic* m_ponyAnimLogic;
+	EntityAnimController* m_ponyControllerModel;
 	std::map<std::string, CastCommandModel*> m_abilities;
 
 	void initPartyFromJson();
@@ -56,8 +58,12 @@ public:
 
 	virtual void update( float dt );
 
+	//old auto-ai routines
 	void PerformEnemyAI( GameEntity* enemy );
 	void PerformPlayerAi( GameEntity* player );
+
+	//new generic controller routine
+	void handleEntityCommand( std::string cmd );
 
 	void onEntityEffectEvent( CCObject* e );
 	void onEntityDeath( CCObject* e );

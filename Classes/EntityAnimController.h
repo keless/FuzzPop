@@ -32,6 +32,8 @@ public:
 	EntityAnimController(AnimationLogic* animLogic);
 	~EntityAnimController(void);
 
+	void setAnimLogic( AnimationLogic* logic ) { m_logic = logic; }
+
 	void setImpulseMapping( std::string entityImpulseCmd, std::string animEvent );
 
 	bool attemptCommand( std::string entityImpulseCmd, AnimatedSprite* onSprite );

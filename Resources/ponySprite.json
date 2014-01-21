@@ -1,13 +1,16 @@
 {
 	"animLogic":{
-		"events":["end", "idle", "walk", "run", "die" ],
+		"events":["end", "idle", "walk", "run", "attack1", "attack2", "attack3", "die" ],
 		"default":"idle",
 		"states":{ 
-			"idle":{ "end":"idle", "die":"dying", "walk":"walk", "run":"run" },
-			"walk":{ "end":"walk", "die":"dying", "idle":"idle", "run":"run" },
+			"idle":{ "end":"idle", "die":"dying", "walk":"walk", "run":"run","attack1":"attack1","attack2":"attack2","attack3":"attack3" },
+			"walk":{ "end":"walk", "die":"dying", "idle":"idle", "run":"run","attack1":"attack1" },
 			"run": {"end":"run", "die":"dying", "idle":"idle", "walk":"walk" },
 			"jump":{ "end":"idle", "die":"dying","idle":"idle" },
 			"dying":{ "end":"dead" },
+			"attack1":{ "end":"idle", "die":"dying" },
+			"attack2":{ "end":"idle", "die":"dying" },
+			"attack3":{ "end":"idle", "die":"dying" },
 			"dead":{ "end":"dead" }
 			}
 		},
@@ -20,6 +23,9 @@
 			"walk":[ 12,2, 13,2, 14,2, 15,2, 16,2, 17,2 ],
 			"run": [ 12,3, 13,3, 14,3, 15,3, 16,3, 17,3 ],
 			"jump":[ 12,4, 13,4, 14,4, 15,4, 16,4, 17,4 ],
+			"attack1":[ 0,9, 1,9, 2,9, 3,9, 4,9, 5,9, 6,9, 7,9, 8,9, 9,9 ],
+			"attack2":[ 9,9, 10,9, 11,9, 12,9, 13,9 ],
+			"attack3":[ 0,10, 1,10, 2,10, 3,10, 4,10, 5,10 ],
 			"dying":[ 0,10 ],
 			"dead":[ 11,0 ]
 		}

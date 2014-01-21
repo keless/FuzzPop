@@ -13,6 +13,7 @@ using namespace cocos2d;
 using namespace ZZ;
 
 #include "GameItem.h"
+#include "EntityAnimController.h"
 
 #define INVENTORY_SIZE GIT_COUNT  //assumes one slot for each type
 #define INV_SLOT_WEAPON GIT_WEAPON
@@ -23,6 +24,7 @@ class GameEntity :
 	public CCObject, public ICastEntity, public EventBus
 {
 	AnimationLogic* m_animLogic;
+	EntityAnimController* m_animController;
 
 	int hp_base;
 	int hp_curr;
@@ -62,8 +64,10 @@ class GameEntity :
 	void doItemEquip( GameItem* item, int idx );
 	void doItemUnequip( int idx );
 
+	void _autoInit();
 public:
 	GameEntity( std::string name, JsonValueRef animLogicJson);
+	GameEntity( std::string name, AnimationLogic* animLogic );
 	~GameEntity(void);
 
 	Json::Value toJson();
@@ -73,6 +77,8 @@ public:
 	void setName(std::string name) { m_name = name; }
 
 	AnimationLogic* getAnimLogic() { return m_animLogic; }
+	EntityAnimController* getAnimController() { return m_animController; }
+	void setAnimController( EntityAnimController* ac ) { m_animController = ac; }
 
 	std::string getLevelStr();
 
@@ -86,6 +92,8 @@ public:
 
 	void setItemAtSlot( int slotIdx, GameItem* item);
 	GameItem* getItemAtSlot(int slotIdx );
+
+	bool handleEntityCommand(std::string cmd );
 
 	//true if not casting any abilities and has valid target
 	bool canCast();

@@ -47,7 +47,17 @@ bool BattleManagerScreen::init()
 	EventBus::game()->addListener("GameEntityLevelupEvt", this, callfuncO_selector(BattleManagerScreen::onEntityLevelup));
 	EventBus::game()->addListener("GameEntityEffectEvt", this, callfuncO_selector(BattleManagerScreen::onEntityEffectEvent));
 	
-	
+	Json::Value data = ReadFileToJson("ponySprite.json");
+	m_ponyAnimLogic = AnimationLogic::create(data["animLogic"]);
+	m_ponyControllerModel = new EntityAnimController(m_ponyAnimLogic);
+	m_ponyControllerModel->setImpulseMapping("walkN", "walk");
+	m_ponyControllerModel->setImpulseMapping("walkE", "walk");
+	m_ponyControllerModel->setImpulseMapping("walkS", "walk");
+	m_ponyControllerModel->setImpulseMapping("walkW", "walk");
+	m_ponyControllerModel->setImpulseMapping("startJump", "jump");
+	m_ponyControllerModel->setImpulseMapping("doubleJump", "jump");
+	m_ponyControllerModel->setImpulseMapping("startDeath", "die");
+
 	CastWorldModel::get()->setPhysicsInterface(this);
 
 	initPartyFromJson();
@@ -100,6 +110,7 @@ void BattleManagerScreen::removeEntity( GameEntity* entity, bool isEnemy )
 			if( (enemy.model) == entity ) {
 				m_players.erase( m_players.begin() + i );
 				removed = true;
+
 				break;
 			}
 		}
@@ -217,6 +228,7 @@ void BattleManagerScreen::update( float dt )
 
 	
 }
+
 
 //#define DISABLE_ATTACKS
 
@@ -567,15 +579,16 @@ void BattleManagerScreen::initPartyFromJson()
 	Json::Value data = ReadFileToJson("ponySprite.json");
 
 	EntityPair player;
-	player.model = new GameEntity("derpy", data["animSet"]);
+	player.model = new GameEntity("derpy", m_ponyAnimLogic);
+	player.model->setAnimController(m_ponyControllerModel);
 	//player.model->initFromJson();
 	player.view = new GameEntityView( player.model, data["animSprite"] );
 	player.view->setPositionX(150);
 	player.view->setPositionY(150);
-	player.view->handleAnimEvent("idle");
-	player.view->handleAnimEvent("walk");
+	player.view->setAnimState("idle");
 	addChild(player.view);
 
+	
 	m_players.push_back(player);
 	m_allEntities.push_back(player);
 
