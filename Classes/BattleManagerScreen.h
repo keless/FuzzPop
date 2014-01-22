@@ -48,7 +48,7 @@ protected:
 
 	float getPartySpeed();
 
-	EntityPair* getClosestPlayerToEnemy( EntityPair* enemy );
+	EntityPair* getClosestPlayerToEnemy( EntityPair* enemy, float& outRange );
 	void enemyMovementAI( float dt, EntityPair* enemy, EntityPair* targetPlayer );
 
 public:

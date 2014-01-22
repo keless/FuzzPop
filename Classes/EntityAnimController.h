@@ -36,7 +36,8 @@ public:
 
 	void setImpulseMapping( std::string entityImpulseCmd, std::string animEvent );
 
-	bool attemptCommand( std::string entityImpulseCmd, AnimatedSprite* onSprite );
+	//ignore if same state will cause return TRUE if we try to switch to 'walk' while we're already in 'walk'
+	bool attemptCommand( std::string entityImpulseCmd, AnimatedSprite* onSprite, bool ignoreIfSameState );
 };
 
 #endif

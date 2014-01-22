@@ -79,7 +79,7 @@ public:
 
 	const std::string getCurrAnimName() { return m_currAnimName; }
 
-	bool handleAnimEvent( std::string evt );
+	bool handleAnimEvent( std::string evt, bool ignoreIfSameState = false );
 	bool setAnimState( std::string stateName );
 };
 

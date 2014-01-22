@@ -16,12 +16,12 @@ void EntityAnimController::setImpulseMapping( std::string entityImpulseCmd, std:
 	m_impulseMap[ entityImpulseCmd ] = animEvent;
 }
 
-bool EntityAnimController::attemptCommand( std::string entityImpulseCmd, AnimatedSprite* onSprite )
+bool EntityAnimController::attemptCommand( std::string entityImpulseCmd, AnimatedSprite* onSprite, bool ignoreIfSameState )
 {
 	if( m_impulseMap.count( entityImpulseCmd ) < 1 ) return false; //could not find command
 
 	const std::string& animEvent = m_impulseMap[ entityImpulseCmd ];
 
-	return onSprite->handleAnimEvent( animEvent );
+	return onSprite->handleAnimEvent( animEvent, ignoreIfSameState );
 }
 

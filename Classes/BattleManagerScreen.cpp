@@ -177,10 +177,12 @@ void BattleManagerScreen::update( float dt )
 	if( m_enemies.size()  == 0 ) {
 
 
-		//move forward
+		//move party forward
 
 		float speed = getPartySpeed();
 		m_travelProgess += speed * dt;
+
+		//TODO: set party animations to walk
 
 		m_pbTravel->setProgress( m_travelProgess/ m_travelDistance );
 
@@ -198,9 +200,6 @@ void BattleManagerScreen::update( float dt )
 		
 
 		}
-
-		
-
 
 		if( m_travelProgess >= m_travelDistance )
 		{
@@ -247,7 +246,8 @@ void BattleManagerScreen::PerformEnemyAI( float dt, EntityPair* enemy )
 	CastCommandState* cast = abilities[ rand() % abilities.size() ];
 
 	//TODO: if beneficial, select friendly target
-	EntityPair* player = getClosestPlayerToEnemy(enemy);
+	float range = 0;
+	EntityPair* player = getClosestPlayerToEnemy(enemy, range);
 
 	if( player == NULL ) {
 		//no target, do nothing
@@ -260,11 +260,12 @@ void BattleManagerScreen::PerformEnemyAI( float dt, EntityPair* enemy )
 
 	//todo: check attack animation type requirement
 	// meleeAttack, castAttack, rangedAttack -- based on weapon type?
-	if( enemy->model->canCast()
-		&& enemy->model->handleEntityCommand("meleeAttack", enemy->view)
+	if( enemy->model->canCast() && (cast->getRange() >= range)
+		&& enemy->model->handleEntityCommand("meleeAttack", enemy->view, true)
 		) {
 
 #ifndef DISABLE_ATTACKS
+			CCLOG("EnemyAI: perform attack");
 		cast->startCast();
 #endif
 
@@ -274,7 +275,7 @@ void BattleManagerScreen::PerformEnemyAI( float dt, EntityPair* enemy )
 	}
 }
 
-EntityPair* BattleManagerScreen::getClosestPlayerToEnemy( EntityPair* enemy )
+EntityPair* BattleManagerScreen::getClosestPlayerToEnemy( EntityPair* enemy, float& outRange )
 {
 	//handle selection from multiple players (heuristic: shortest distance)
 	float shortestDistanceSQ = 999999;
@@ -293,6 +294,8 @@ EntityPair* BattleManagerScreen::getClosestPlayerToEnemy( EntityPair* enemy )
 	}
 
 	if( idx < 0 ) return NULL; //no targets within max dist
+
+	outRange = sqrtf(shortestDistanceSQ);
 
 	return &(m_players[idx]);
 }
@@ -369,7 +372,7 @@ void BattleManagerScreen::enemyMovementAI( float dt, EntityPair* enemy, EntityPa
 	
 	if( impulses.size() == 0 ) {
 		//set animation to idle/stopped
-		enemy->model->handleEntityCommand("idle", enemy->view);
+		enemy->model->handleEntityCommand("idle", enemy->view, true);
 		return;
 	}
 
@@ -398,14 +401,14 @@ void BattleManagerScreen::enemyMovementAI( float dt, EntityPair* enemy, EntityPa
 	if( kmVec2Length(& finalImpulse) <  (0.5f) )
 	{
 		//set animation to idle/stopped
-		enemy->model->handleEntityCommand("idle", enemy->view);
+		enemy->model->handleEntityCommand("idle", enemy->view, true);
 
 		//CCLog("ignore impulse %.4f", kmVec2Length(& finalImpulse));
 		return; //ignore very small changes to avoid leash jitter
 	}
 
 	//TODO: handle walk/run differences?
-	if( enemy->model->handleEntityCommand("walk", enemy->view) ) 
+	if( enemy->model->handleEntityCommand("walk", enemy->view, true) ) 
 	{
 		ePos.x += scaledImpulse.x;
 		ePos.y += scaledImpulse.y;

@@ -191,9 +191,12 @@ bool AnimatedSprite::init(  AnimationLogic* animLogic, JsonValueRef animSprite )
 	return true;
 }
 
-bool AnimatedSprite::handleAnimEvent( std::string evt )
+bool AnimatedSprite::handleAnimEvent( std::string evt, bool ignoreIfSameState )
 {
 	std::string nextState = m_animLogic->getTransition( evt, m_currAnimName );
+
+	if( ignoreIfSameState && nextState == "" ) return true;
+
 	return setAnimState(nextState);
 
 }
@@ -254,7 +257,7 @@ bool AnimatedSprite::setAnimState( std::string stateName )
 
 void AnimatedSprite::onAnimStateEnd()
 {
-	handleAnimEvent("end");
+	handleAnimEvent("end", false);
 }
 
 }
