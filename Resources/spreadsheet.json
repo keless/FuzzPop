@@ -179,7 +179,7 @@
             "casttime": 0.1,
             "cooldowntime": 1.75,
             "range": 1,
-            "effectsoncast": [
+            "effectsOnCast": [
                 {
                     "effectType": "debuff",
                     "targetStat": "str_curr",

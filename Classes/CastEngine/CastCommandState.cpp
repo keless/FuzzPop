@@ -216,7 +216,7 @@ void CastCommandState::onCastComplete()
 	//target->validateTargets();
 	bool hasTargetInRange = target->hasTargetsAtRangeFromEntity(m_pModel->getRange(), m_iOwner);
 	if(!hasTargetInRange) {
-		//CCLOG("CCS: no targets in range on cast of %s", m_pModel->getName().c_str() );
+		CCLOG("CCS: no targets in range on cast of %s", m_pModel->getName().c_str() );
 		onCooldownStart();
 		return;
 	}

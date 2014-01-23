@@ -12,9 +12,18 @@ GameEntityView::GameEntityView( GameEntity* entity, JsonValueRef animSpriteJson 
 	AnimationLogic* animLogic = m_pEntity->getAnimLogic();
 	AnimatedSprite::init(animLogic, animSpriteJson);
 
+	m_healthBar = NULL;
+	m_manaBar = NULL;
+	m_xpBar = NULL;
+	m_lblName = NULL;
+	m_lblLevel = NULL;
+	m_highlight = NULL;
+	m_debuffIndicator = NULL;
+	m_buffIndicator = NULL;
+
 	//TODO: synch animatedSprite up with GameEntity
 
-	//initView();
+	initView();
 
 	//scheduleUpdate();
 }
@@ -22,17 +31,28 @@ GameEntityView::GameEntityView( GameEntity* entity, JsonValueRef animSpriteJson 
 //virtual 
 void GameEntityView::initView()
 {
-	/*
+	
+	int margin = 2;
 	int cardW = 200;
 	int cardH = 200;
 	setContentSize( CCSizeMake( cardW, cardH ));
 	setAnchorPoint(ccp(0.5f,0.5f));
 
+
+	int healthBarH = 30;
+	m_healthBar = ProgressBar::create( CCRectMake(0,0, cardW/2, healthBarH) );
+	m_healthBar->setMargin(margin);
+	m_healthBar->setProgress(  m_pEntity->getProperty("hp_curr") / (m_pEntity->getProperty("hp_base")) );
+	m_healthBar->setAnchorPoint(ccp(0.0f, 1.0f) );
+	//m_healthBar->setPositionY( 200 - m_lblName->getContentSize().height );
+	addChild(m_healthBar, 49);
+
+	/*
 	CCLayerColor* bg = CCLayerColor::create(ccc4(25,25,25,255), cardW,cardH);
 	bg->setAnchorPoint(ccp(0,0));
 	addChild(bg, 1);
 
-	int margin = 2;
+	
 	m_highlight = CCLayerColor::create(ccc4(200,200,20,255), cardW+margin*2,cardH+margin*2);
 	m_highlight->setPosition(ccp(-margin,-margin));
 	m_highlight->setAnchorPoint(ccp(0,0));
@@ -45,13 +65,7 @@ void GameEntityView::initView()
 	m_lblName->setPositionY(cardH);
 	addChild(m_lblName, 50);
 
-	int healthBarH = 30;
-	m_healthBar = ProgressBar::create( CCRectMake(0,0, cardW/2, healthBarH) );
-	m_healthBar->setMargin(margin);
-	m_healthBar->setProgress(  m_pEntity->getProperty("hp_curr") / (m_pEntity->getProperty("hp_base")) );
-	m_healthBar->setAnchorPoint(ccp(0.0f, 1.0f) );
-	m_healthBar->setPositionY( 200 - m_lblName->getContentSize().height );
-	addChild(m_healthBar, 49);
+
 
 	int manaBarH = 10;
 	m_manaBar = ProgressBar::create( CCRectMake( 0,0, cardW/2, manaBarH ) );
@@ -173,8 +187,9 @@ void GameEntityView::doBurn()
 {
 	//CCLog("particle system burn");
 
+
 	CCParticleFire* fire = CCParticleFire::createWithTotalParticles(150);
-	CCPoint point = CCPointMake(  m_healthBar->getContentSize().width/2, 0 );
+	CCPoint point = CCPointMake( getContentSize().width/2, 0 );
 
 	//fire->stopSystem();
 	fire->setSpeed(20);
@@ -184,7 +199,7 @@ void GameEntityView::doBurn()
 	fire->setPosVar( posVar );
 
 	fire->setPosition( point );
-	m_healthBar->addChild(fire);
+	addChild(fire);
 
 	CCSequence* seq = CCSequence::create(
 					CCDelayTime::create(0.5f),
@@ -200,7 +215,7 @@ void GameEntityView::doBurn()
 void GameEntityView::doLifedrain( ICastEntity* to )
 {
 	CCParticleFire* life = CCParticleFire::createWithTotalParticles(25);
-	CCPoint point =  m_healthBar->boundingBox().origin;
+	CCPoint point =  boundingBox().origin;
 
 	life->setStartColor( ccc4f(0,1.0f,0,1.0f) );
 	life->setEndColor( ccc4f(0,1.0f,0,1.0f) );
@@ -212,7 +227,7 @@ void GameEntityView::doLifedrain( ICastEntity* to )
 	life->setStartSize(25);
 	life->setPosVar( CCPointMake( 10,10 ));
 
-	m_healthBar->addChild(life);
+	addChild(life);
 
 	CCSequence* seq = CCSequence::create(
 				CCDelayTime::create(0.5f),
@@ -228,7 +243,7 @@ void GameEntityView::doLifedrain( ICastEntity* to )
 void GameEntityView::doHeal()
 {
 	CCParticleFire* heal = CCParticleFire::createWithTotalParticles(25);
-	CCPoint point = CCPointMake(  m_healthBar->getContentSize().width/2, 0 );
+	CCPoint point = CCPointMake(  getContentSize().width/2, 0 );
 
 	heal->setStartColor( ccc4f(1,1,1,1.0f) );
 	heal->setEndColor( ccc4f(1,1,1,1.0f) );
@@ -240,7 +255,7 @@ void GameEntityView::doHeal()
 	heal->setPosVar( posVar );
 
 	heal->setPosition( point );
-	m_healthBar->addChild(heal);
+	addChild(heal);
 
 	CCSequence* seq = CCSequence::create(
 					CCDelayTime::create(0.5f),
@@ -282,16 +297,16 @@ void GameEntityView::setHighlighted( bool highlight )
 
 void GameEntityView::updateView()
 {
-	m_lblName->setString( m_pEntity->getName().c_str() );
-	m_healthBar->setProgress(  (m_pEntity->getProperty("hp_curr")) / (float) (m_pEntity->getProperty("hp_base")) );
-	m_manaBar->setProgress(  (m_pEntity->getProperty("mana_curr")) / (float) (m_pEntity->getProperty("mana_base")) );
-	if(  m_pEntity->getProperty("xp_next") > 0 ) {
+	if(m_lblName) m_lblName->setString( m_pEntity->getName().c_str() );
+	if(m_healthBar) m_healthBar->setProgress(  (m_pEntity->getProperty("hp_curr")) / (float) (m_pEntity->getProperty("hp_base")) );
+	if(m_manaBar) m_manaBar->setProgress(  (m_pEntity->getProperty("mana_curr")) / (float) (m_pEntity->getProperty("mana_base")) );
+	if( m_xpBar && m_pEntity->getProperty("xp_next") > 0 ) {
 		m_xpBar->setProgress( m_pEntity->getProperty("xp_curr") / m_pEntity->getProperty("xp_next") );
 	}
-	m_lblLevel->setString( m_pEntity->getLevelStr().c_str() );
+	if(m_lblLevel) m_lblLevel->setString( m_pEntity->getLevelStr().c_str() );
 	
-	m_buffIndicator->setVisible( m_pEntity->numBuffs() > 0 );
-	m_debuffIndicator->setVisible( m_pEntity->numDebuffs() > 0 );
+	if(m_buffIndicator) m_buffIndicator->setVisible( m_pEntity->numBuffs() > 0 );
+	if(m_debuffIndicator) m_debuffIndicator->setVisible( m_pEntity->numDebuffs() > 0 );
 }
 
 bool GameEntityView::ccTouchBegan(CCTouch* touch, CCEvent* event)
