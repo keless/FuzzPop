@@ -261,7 +261,7 @@ void BattleManagerScreen::PerformEnemyAI( float dt, EntityPair* enemy )
 	//todo: check attack animation type requirement
 	// meleeAttack, castAttack, rangedAttack -- based on weapon type?
 	if( enemy->model->canCast() && (cast->getRange() >= range)
-		&& enemy->model->handleEntityCommand("meleeAttack", enemy->view, true)
+		&& enemy->model->handleEntityCommand(cast->getDescriptor().get("castStartAnimName","").asString(), enemy->view, true)
 		) {
 
 #ifndef DISABLE_ATTACKS

@@ -179,6 +179,7 @@
             "casttime": 0.1,
             "cooldowntime": 1.75,
             "range": 1,
+			"castStartAnimName":"meleeAttack",
             "effectsOnCast": [
                 {
                     "effectType": "debuff",

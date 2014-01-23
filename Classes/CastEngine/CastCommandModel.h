@@ -36,7 +36,6 @@ class CastCommandModel :
 	float effectSize; //zero if no physics involved
 	int effectShape; //singleTarget, line, cone, circle, etc
 
-
 	//debug:
 	Json::Value descriptor;
 
@@ -56,6 +55,10 @@ public:
 	float getRange() { return range; }
 
 	std::string getName() { return name; }
+
+	std::string getCastStartAnimName();
+	std::string getCastChannelAnimName();
+	std::string getCastEndAnimName();
 
 	friend class CastCommandState;
 	friend class CastEffect;

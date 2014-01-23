@@ -48,3 +48,16 @@ Json::Value CastCommandModel::getEffectOnCast( int idx )
 {
 	return descriptor["effectsOnCast"][idx];
 }
+
+std::string CastCommandModel::getCastStartAnimName()
+{
+	return descriptor.get("castStartAnimName", "").asString();
+}
+std::string CastCommandModel::getCastChannelAnimName()
+{
+	return descriptor.get("castChannelAnimName", "").asString();
+}
+std::string CastCommandModel::getCastEndAnimName()
+{
+	return descriptor.get("castEndAnimName", "").asString();
+}
