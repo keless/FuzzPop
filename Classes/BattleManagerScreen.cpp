@@ -492,9 +492,15 @@ void BattleManagerScreen::PerformPlayerAi( float dt, EntityPair* player )
 			}
 
 #ifndef DISABLE_ATTACKS
+
+	if( player->model->canCast() && player->model->handleEntityCommand(cast->getDescriptor().get("castStartAnimName","").asString(), player->view, true)
+		) {
+
 			if( !dontCast ) {
 				cast->startCast();
 			}
+
+	}
 #endif
 		}
 
@@ -634,6 +640,7 @@ void BattleManagerScreen::initPartyFromJson()
 {
 	Json::Value data = ReadFileToJson("ponySprite.json");
 
+	/*
 	EntityPair player;
 	player.model = new GameEntity("derpy", m_ponyAnimLogic);
 	player.model->setAnimController(m_ponyControllerModel);
@@ -647,8 +654,9 @@ void BattleManagerScreen::initPartyFromJson()
 	
 	m_players.push_back(player);
 	m_allEntities.push_back(player);
+	*/
 
-	/*
+	
 	Json::Value party = ReadFileToJson( FILE_PARTY_MEMBERS_JSON );
 
 	if( !party.isArray() ) return; //invalid json or empty party
@@ -659,7 +667,8 @@ void BattleManagerScreen::initPartyFromJson()
 
 		const Json::Value& partyMember = party[i];
 
-		player.model = new GameEntity("");
+		player.model = new GameEntity("derpy", m_ponyAnimLogic);
+		player.model->setAnimController(m_ponyControllerModel);
 		player.model->initFromJson( partyMember );
 		//m_playerModel->incProperty("hp_curr", -90);
 		player.model->incProperty("xp_next", 100, NULL);
@@ -667,15 +676,16 @@ void BattleManagerScreen::initPartyFromJson()
 		//player.model->addAbility( m_abilities["Life Drain"] );
 		//player.model->addAbility( m_abilities["Curse of Weakness"] );
 
-		player.view = new GameEntityView( player.model );
+		player.view = new GameEntityView( player.model, data["animSprite"] );
 		player.view->setPositionX(150);
 		player.view->setPositionY(150 + 200 * i);
+		player.view->setAnimState("idle");
 		addChild(player.view);
 
 		m_players.push_back(player);
 		m_allEntities.push_back(player);
 	}
-	*/
+	
 }
 
 bool BattleManagerScreen::GetVecBetween( ICastEntity* from, ICastEntity* to, kmVec2& distVec )

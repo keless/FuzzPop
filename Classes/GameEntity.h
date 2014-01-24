@@ -158,11 +158,12 @@ public:
 //NOTE: dispatches on global game bus, not the GameEntity
 class GameEntityEffectEvt : public CCObject
 {
-public:
+public: 
 	ICastEntity* target;
 	ICastEntity* origin;
 	std::string name;
 
 	GameEntityEffectEvt( std::string effect, ICastEntity* from, ICastEntity* to ) : name(effect), target(to), origin(from) { this->autorelease(); }
 };
+
 #endif

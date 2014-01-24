@@ -54,6 +54,7 @@
                     "name": "Attack",
                     "castTime": 0.15,
                     "cooldownTime": 1.85,
+					"castStartAnimName":"meleeAttack",
                     "range": 1,
                     "effectsOnCast": [
                         {
@@ -77,6 +78,7 @@
                     "name": "Attack",
                     "castTime": 0.15,
                     "cooldownTime": 1.85,
+					"castStartAnimName":"rangedAttack",
                     "range": 2,
                     "effectsOnCast": [
                         {
@@ -100,6 +102,7 @@
                     "name": "Attack",
                     "castTime": 0.15,
                     "cooldownTime": 1.85,
+					"castStartAnimName":"rangedAttack",
                     "range": 3,
                     "effectsOnCast": [
                         {
